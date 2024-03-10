@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome to Twiddle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f7ff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            /* Add background image */
+            background-image: url('home.jpg');
+            /* Adjust the background image properties */
+            background-size: cover;
+            background-position: center;
+            position: relative; /* Added for z-index */
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.5); /* Adjust the opacity value as needed */
+            z-index: -1;
+        }
+
+        h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 20px;
+            /* Make text more visible */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .button-container {
+            text-align: center;
+        }
+
+        button {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div> <!-- Semi-transparent overlay -->
+    <div class="button-container">
+        <h1>Welcome to Twiddle</h1>
+        <button id="registrationButton">Hospital Registration</button>
+        <button id="selectButton">Select a Hospital</button>
+    </div>
+
+    <script>
+        document.getElementById("registrationButton").addEventListener("click", function() {
+            // Add code to open the registration form
+            window.location.href = "page02.html";
+        });
+
+        document.getElementById("selectButton").addEventListener("click", function() {
+            // Add code to navigate to the hospital selection page
+            window.location.href = "page03.html";
+        });
+    </script>
+</body>
+</html>
