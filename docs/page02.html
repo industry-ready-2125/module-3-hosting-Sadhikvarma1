@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Hospital Registration Form</title>
+    <!-- Add the Firebase JavaScript SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <!-- Add your Firebase configuration -->
+    <script src="firebase-config.js"></script>
+
+    <style>
+        .background-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('home.jpg');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            opacity: 0.5; /* Adjust the opacity to make the image lighter */
+        }
+        body {
+    font-family: Arial, sans-serif;
+     /* Replace 'home.jpg' with the path to your background image */
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column; /* Center content vertically */
+   
+}
+
+h1 {
+    color: #004080;
+}
+
+form {
+    background-color: rgba(255, 255, 255, 0.8); /* Use rgba for background color with opacity */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    margin: 20px;
+    width: 300px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #004080;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #004080;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #00264d;
+}
+
+#confirmationMessage {
+    color: #00264d;
+    margin-top: 20px;
+}
+
+</style>
+
+    </style>
+</head>
+<body>
+    <h1>Hospital Registration Form</h1>
+    <form id="registrationForm">
+        <label for="hospitalName">Hospital Name:</label>
+        <input type="text" id="hospitalName" name="hospitalName" required>
+
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" required>
+
+        <label for="numDoctors">Number of Doctors:</label>
+        <input type="number" id="numDoctors" name="numDoctors" min="1" required>
+
+        <div id="doctorFields"></div>
+
+        <label for="equipmentDetails">Equipment Details:</label>
+        <textarea id="equipmentDetails" name="equipmentDetails" rows="4" required></textarea>
+
+        <button type="button" onclick="submitForm()">Submit</button>
+    </form>
+    <div class="background-image"></div>
+
+    <div id="confirmationMessage"></div>
+
+    <script>
+        // Initialize Firebase (using your Firebase configuration)
+        firebase.initializeApp(firebaseConfig);
+
+        // Get a reference to the database
+        const database = firebase.database();
+
+        // Function to submit the form
+        function submitForm() {
+            // Get form data
+            const hospitalName = document.getElementById("hospitalName").value;
+            const location = document.getElementById("location").value;
+            const numDoctors = parseInt(document.getElementById("numDoctors").value);
+            const equipmentDetails = document.getElementById("equipmentDetails").value;
+
+            const doctorFieldsContainer = document.getElementById("doctorFields");
+            doctorFieldsContainer.innerHTML = ""; // Clear previous fields
+
+            for (let i = 1; i <= numDoctors; i++) {
+                const doctorFieldDiv = document.createElement("div");
+
+                const doctorNameLabel = document.createElement("label");
+                doctorNameLabel.textContent = `Doctor ${i} Name:`;
+                const doctorNameInput = document.createElement("input");
+                doctorNameInput.type = "text";
+                doctorNameInput.id = `doctorName${i}`;
+                doctorNameInput.name = `doctorName${i}`;
+                doctorNameInput.required = true;
+
+                const doctorSpecializationLabel = document.createElement("label");
+                doctorSpecializationLabel.textContent = `Doctor ${i} Specialization:`;
+                const doctorSpecializationInput = document.createElement("input");
+                doctorSpecializationInput.type = "text";
+                doctorSpecializationInput.id = `doctorSpecialization${i}`;
+                doctorSpecializationInput.name = `doctorSpecialization${i}`;
+                doctorSpecializationInput.required = true;
+
+                doctorFieldDiv.appendChild(doctorNameLabel);
+                doctorFieldDiv.appendChild(doctorNameInput);
+                doctorFieldDiv.appendChild(doctorSpecializationLabel);
+                doctorFieldDiv.appendChild(doctorSpecializationInput);
+
+                doctorFieldsContainer.appendChild(doctorFieldDiv);
+            }
+
+            // Check if all required fields are filled
+            const allFieldsFilled = [hospitalName, location, numDoctors, equipmentDetails]
+                .every(field => field !== undefined && field !== "");
+            
+            if (allFieldsFilled) {
+                // Save data to the Firebase database
+                const hospitalData = {
+                    hospitalName: hospitalName,
+                    location: location,
+                    numDoctors: numDoctors,
+                    equipmentDetails: equipmentDetails,
+                    doctors: [],
+                };
+
+                for (let i = 1; i <= numDoctors; i++) {
+                    const doctorName = document.getElementById(`doctorName${i}`).value;
+                    const doctorSpecialization = document.getElementById(`doctorSpecialization${i}`).value;
+                    hospitalData.doctors.push({
+                        name: doctorName,
+                        specialization: doctorSpecialization,
+                    });
+                }
+
+                database.ref("hospitalRegistrations").push(hospitalData)
+                    .then(function() {
+                        document.getElementById("confirmationMessage").innerText = "Hospital registration successful!";
+                        // Clear form after successful registration
+                        document.getElementById("registrationForm").reset();
+                        setTimeout(function() {
+                            document.getElementById("confirmationMessage").innerText = "";
+                        }, 3000);
+                    })
+                    .catch(function(error) {
+                        document.getElementById("confirmationMessage").innerText = "Error during registration: " + error.message;
+                    });
+            } else {
+                document.getElementById("confirmationMessage").innerText = "Please fill in all required fields.";
+            }
+        }
+
+        // Dynamically add doctor input fields based on the number of doctors
+        document.getElementById("numDoctors").addEventListener("input", function() {
+            submitForm(); // Trigger form creation when the number of doctors changes
+        });
+    </script>
+</body>
+</html>
